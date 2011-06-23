@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Touch Shim</title>
+    <script src="Scripts/jquery-1.6.1.min.js" type="text/javascript"></script>
+    <script src="js/touchshim.js" type="text/javascript"></script>
+    <div id="add">Add handler</div>
+    <div id="remove">remove handler</div>
+    <div id="foo"></div>
+</head>
+<body>
+    <p>Creates a common interface for touch events following the W3C standard (currently draft)</p>
+    <div id="touchEnabled"></div>
+    <script>
+        $(document).ready(function () {
+            //            var touchEnabled = false;
+            //            if (touchEnabled) {
+            //                $('#touchEnabled').text('Yes');
+            //            } else {
+            //                $('#touchEnabled').text('No');
+            //            }
+
+            $('#add').click(function () {
+                TOUCH.addEventListener('touchstart', 'foo', handler);
+            });
+
+            $('#remove').click(function () {
+                TOUCH.removeEventListener('touchstart', 'foo', handler);
+            });
+
+            function handler() {
+                alert('hi');
+            }
+
+        });
+    </script>
+</body>
+</html>
