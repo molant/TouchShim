@@ -2,13 +2,14 @@
 
 
 var TOUCH = {
-    _dom: { 
-        touchstart:[],
-        touchend:[],
-        touchmove:[],
-        touchenter:[],
-        touchleave:[],
-        touchcancel:[]
+    _subscribed: false,
+    _dom: {
+        touchstart: [],
+        touchend: [],
+        touchmove: [],
+        touchenter: [],
+        touchleave: [],
+        touchcancel: []
     },
 
     _equals: function (x) {
@@ -48,9 +49,66 @@ var TOUCH = {
     _touchesLeave: [],
     _touchesCancel: [],
 
+    _onTouchStart: function (event) {
+        var i, touchstart = TOUCH._dom['touchstart'], touchEvent;
+        touchEvent = {
+            identifier: event.streamId,
+            clientX: event.clientX,
+            clientY: event.clientY,
+            screenX: event.clientX + (window.outerWidth - window.innerWidth) / 2 + window.screenX,
+            screenY: event.clientY + (window.outerHeight - window.innerHeight) + window.screenY, //aprox, can't calculate exact value :(            
+            pageX: event.clientX + window.pageXOffset,
+            pageY: event.clientY + window.pageYOffset,
+            radiusX: 0,
+            radiusY: 0,
+            rotationAngle: 0,
+            force: 0,
+            type: 'touchstart'
+        };
+
+        TOUCH._touches.push(touchEvent);
+        for (i = TOUCH._touches.length - 1; i >= 0; i--) {
+            if (TOUCH._touches[i].type === 'touchend' || TOUCH._touches[i].type === 'cancel') {
+                TOUCH._touches[i].splice(i, 1);
+            }
+        }
+
+        for (i = 0; i < touchstart.length; i++) {
+            touchstart[i].handler(event);
+        }
+    },
+    _onTouchEnd: function (event) {
+        var i;
+        for (i = _touches.length - 1; i >= 0; i--) {
+            if (_touches[i].identifier === event.streamId) {
+                _touches[i].type = 'touchend';
+                //recreate list?
+                break;
+            } else if (TOUCH._touches[i].type === 'touchend' || TOUCH._touches[i].type === 'cancel') {
+                TOUCH._touches[i].splice(i, 1);
+            }
+        }
+    },
+    _onTouchMove: function (event) {
+        var i;
+        for (i = 0; i < _touches.length; i++) {
+            if (_touches[i].identifier === event.streamId) {
+                _touches[i].type = 'touchmove';
+                //recreate list?
+                break;
+            }
+        }
+    },
+
     addEventListener: function (type, element, handler) {
         var domElement, elemHand;
-                
+        if (!this._subscribed) {
+            document.addEventListener('MozTouchDown', this._onTouchStart, false);
+            document.addEventListener('MozTouchUp', this._onTouchEnd, false);
+            document.addEventListener('MozTouchMove', this._onTouchMove, false);
+        }
+
+
         if (this._dom[type] === undefined) {
             throw 'Event ' + type + ' is not valid';
         }
@@ -93,6 +151,9 @@ var TOUCH = {
         throw 'Element ' + element + ' does not have the handler you have specified';
     },
 
+    dispatchEvent: function (event) {
+
+    },
     detect: function () {
         try {
             document.createEvent("MozTouchDown");

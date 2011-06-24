@@ -9,7 +9,7 @@
     <div id="remove">remove handler</div>
     <div id="foo"></div>
 </head>
-<body>
+<body style="width:2000px;">
     <p>Creates a common interface for touch events following the W3C standard (currently draft)</p>
     <div id="touchEnabled"></div>
     <script>
@@ -21,19 +21,18 @@
             //                $('#touchEnabled').text('No');
             //            }
 
-            $('#add').click(function () {
-                TOUCH.addEventListener('touchstart', 'foo', handler);
-            });
+//            $('#add').click(function () {
+//                TOUCH.addEventListener('touchstart', 'foo', handler);
+//            });
 
-            $('#remove').click(function () {
-                TOUCH.removeEventListener('touchstart', 'foo', handler);
-            });
-
-            function handler() {
-                alert('hi');
-            }
-
+//            $('#remove').click(function () {
+//                TOUCH.removeEventListener('touchstart', 'foo', handler);
+//            });
+            document.addEventListener('mousedown', handler,false);
         });
+        function handler(event) {
+            $('#foo').text('clientX: ' + event.clientX + ' pageX: ' + event.pageX + ' custom:' + (event.clientX+ document.body.scrollLeft));
+        }
     </script>
 </body>
 </html>
