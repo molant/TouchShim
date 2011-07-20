@@ -48,7 +48,7 @@ var TOUCH = {
 
     _touches: [],
 
-    _createTouch: function (evt, currentTime) {
+    _createTouch: function (evt, type, currentTime) {
         var touch = {
             identifier: evt.identifier,
             clientX: evt.clientX,
@@ -61,7 +61,7 @@ var TOUCH = {
             radiusY: 0,
             rotationAngle: 0,
             force: 0,
-            type: 'touchstart',
+            type: type,
             timespan: currentTime
         };
 
@@ -85,7 +85,7 @@ var TOUCH = {
 
     _onTouchStart: function (x, y, id) {
         var i, touchstart = TOUCH._dom['touchstart'],
-            currentTime = Date.now(), evt = { clientX: x, clientY: y, identifier: id }, touch = TOUCH._createTouch(evt, currentTime),
+            currentTime = Date.now(), evt = { clientX: x, clientY: y, identifier: id }, touch = TOUCH._createTouch(evt, 'touchstart', currentTime),
             touchEvent, element = document.elementFromPoint(evt.clientX, evt.clientY);
 
         TOUCH._touches.push(touch);
@@ -116,41 +116,69 @@ var TOUCH = {
         }
     },
 
-    _onTouchEnd: function (event) {
-        //        var i, touchend = TOUCH._dom['touchend'],
-        //            currentTime = Date.now(), touch = TOUCH._createTouch(event),
-        //            touchEvent, element = document.elementFromPoint(event.clientX, event.clientY);
+    _onTouchEnd: function (x, y, id) {
+        var i, touchend = TOUCH._dom['touchend'],
+            currentTime = Date.now(), evt = { clientX: x, clientY: y, identifier: id }, touch = TOUCH._createTouch(evt, 'touchend', currentTime),
+            touchEvent, element = document.elementFromPoint(evt.clientX, evt.clientY);
 
-        //        TOUCH._touches.push(touch);
-        //        touches = [];
+        TOUCH._touches.push(touch);
+        touches = [];
 
-        //        for (i = TOUCH._touches.length - 1; i >= 0; i--) {
-        //            if ((currentTime - TOUCH._touches[i].timespan) <= TOUCH._threshold) {
-        //                if (TOUCH._touches[i].type === 'touchend' || TOUCH._touches[i].type === 'cancel') {
-        //                    TOUCH._touches[i].splice(i, 1);
-        //                } else if (TOUCH._touches[i].type === 'touchstart') {
-        //                    touches.push(TOUCH._touches[i]);
-        //                }
-        //            } else {
-        //                TOUCH._touches[i].splice(i, 1);
-        //            }
-        //        };
+        for (i = TOUCH._touches.length - 1; i >= 0; i--) {
+            if ((currentTime - TOUCH._touches[i].timespan) <= TOUCH._threshold) {
+                if (TOUCH._touches[i].type === 'cancel') {
+                    TOUCH._touches.splice(i, 1);
+                } else if (TOUCH._touches[i].type === 'touchend') {
+                    touches.push(TOUCH._touches[i]);
+                }
+            } else {
+                TOUCH._touches.splice(i, 1);
+            }
+        };
 
-        //        touchEvent = TOUCH._createTouchEvent(touches);
+        touchEvent = TOUCH._createTouchEvent(touches);
 
-        //        for (i = 0; i < touchend.length; i++) {
-        //            touchend[i].handler(touchEvent);
-        //        }
+        while (element) {
+            for (i = 0; i < touchend.length; i++) {
+                if (touchend[i].domElement === element) {
+                    touchend[i].handler(touchEvent);
+                    //do something about bubling here!    
+                }
+            }
+            element = element.parentNode;
+        }
     },
-    _onTouchMove: function (evt) {
-        //        var i;
-        //        for (i = 0; i < _touches.length; i++) {
-        //            if (_touches[i].identifier === event.streamId) {
-        //                _touches[i].type = 'touchmove';
-        //                //recreate list?
-        //                break;
-        //            }
-        //        }
+    _onTouchMove: function (x,y,id) {
+        var i, touchmove = TOUCH._dom['touchmove'],
+            currentTime = Date.now(), evt = { clientX: x, clientY: y, identifier: id }, touch = TOUCH._createTouch(evt,'touchmove', currentTime),
+            touchEvent, element = document.elementFromPoint(evt.clientX, evt.clientY);
+
+        TOUCH._touches.push(touch);
+        touches = [];
+
+        for (i = TOUCH._touches.length - 1; i >= 0; i--) {
+            if ((currentTime - TOUCH._touches[i].timespan) <= TOUCH._threshold) {
+                if (TOUCH._touches[i].type === 'touchend' || TOUCH._touches[i].type === 'cancel') {
+                    TOUCH._touches.splice(i, 1);
+                } else if (TOUCH._touches[i].type === 'touchmove') {
+                    touches.push(TOUCH._touches[i]);
+                }
+            } else {
+                TOUCH._touches.splice(i, 1);
+            }
+        };
+
+        touchEvent = TOUCH._createTouchEvent(touches);
+
+        while (element) {
+            for (i = 0; i < touchmove.length; i++) {
+                if (touchmove[i].domElement === element) {
+                    touchmove[i].handler(touchEvent);
+                    //do something about bubling here!    
+                }
+            }
+            element = element.parentNode;
+        }
     },
 
     _isEventSupported: function (eventName, element) {
