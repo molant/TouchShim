@@ -44,8 +44,7 @@
     </div>
     <script>
         $(document).ready(function () {
-            $('#add').click(function () {
-                var log = window.console.log;
+            $('#add').click(function () {                
                 function touchstart(evt) {
                     var touchEvent = evt.touches[0];
                     log('touchstart Grey');
@@ -65,7 +64,7 @@
 
                 TOUCH.addEventListener('touchmove', 'touch', function (evt) {
                     var touchEvent = evt.touches[0];
-                    log('touchmove Grey: ' + touchEvent.clientX + ' ' + touchEvent.clientY);                    
+                    log('touchmove Grey: ' + touchEvent.clientX + ' ' + touchEvent.clientY + ' ' + touchEvent.identifier + ' ' + touchEvent.timespan);                    
                 });
             });
         });
