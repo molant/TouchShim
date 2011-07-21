@@ -20,42 +20,48 @@ var TOUCH =
     _equals : function(x){
         var p;
         for(p in this){
-            if(typeof(x[p]) == 'undefined'){
-                return false;
+            if(this.hasOwnProperty(p)){
+                if(typeof(x[p]) === 'undefined'){
+                    return false;
+                }
             }
         }
         for(p in this){
-            if(this[p]){
-                switch(typeof(this[p])){
-                    case 'object' : 
-                        if(this[p].equals !== undefined && !this[p].equals(x[p])){
-                            return false;
-                        }
-                        else if(this[p] !== x[p]){
-                            return false;
-                        };
-                        break;
-                    case 'function' : 
-                        if(typeof(x[p]) == 'undefined' || (p != 'equals' && this[p].toString() != x[p].toString())){
-                            return false;
-                        };
-                        break;
-                    default : 
-                        if(this[p] != x[p]){
-                            return false;
-                        }
+            if(this.hasOwnProperty(p)){
+                if(this[p]){
+                    switch(typeof(this[p])){
+                        case 'object' : 
+                            if(this[p].equals !== undefined && !this[p].equals(x[p])){
+                                return false;
+                            }
+                            else if(this[p] !== x[p]){
+                                return false;
+                            };
+                            break;
+                        case 'function' : 
+                            if(typeof(x[p]) === 'undefined' || (p !== 'equals' && this[p].toString() !== x[p].toString())){
+                                return false;
+                            };
+                            break;
+                        default : 
+                            if(this[p] !== x[p]){
+                                return false;
+                            }
+                    }
                 }
-            }
-            else{
-                if(x[p]){
-                    return false;
+                else{
+                    if(x[p]){
+                        return false;
+                    }
                 }
             }
         }
         
         for(p in x){
-            if(typeof(this[p]) == 'undefined'){
-                return false;
+            if(x.hasOwnProperty(p)){
+                if(typeof(this[p]) === 'undefined'){
+                    return false;
+                }
             }
         }
         return true;
@@ -103,7 +109,7 @@ var TOUCH =
     
     _onTouchStart : function(x, y, id){
         var i,
-        touchstart = TOUCH._dom['touchstart'], currentTime = Date.now(), evt = 
+        touchstart = TOUCH._dom.touchstart, currentTime = Date.now(), evt = 
         {
             clientX : x,
             clientY : y,
@@ -152,7 +158,7 @@ var TOUCH =
     
     _onTouchEnd : function(x, y, id){
         var i,
-        touchend = TOUCH._dom['touchend'], currentTime = Date.now(), evt = 
+        touchend = TOUCH._dom.touchend, currentTime = Date.now(), evt = 
         {
             clientX : x,
             clientY : y,
@@ -192,7 +198,7 @@ var TOUCH =
     },
     _onTouchMove : function(x, y, id){
         var i,
-        touchmove = TOUCH._dom['touchmove'], currentTime = Date.now(), evt = 
+        touchmove = TOUCH._dom.touchmove, currentTime = Date.now(), evt = 
         {
             clientX : x,
             clientY : y,
@@ -248,7 +254,7 @@ var TOUCH =
             }
             if(element.setAttribute && element.removeAttribute){
                 element.setAttribute(eventName, "");
-                isSupported = typeof element[eventName] == "function";
+                isSupported = typeof element[eventName] === "function";
                 element.removeAttribute(eventName);
             }
         }
@@ -256,7 +262,7 @@ var TOUCH =
         return isSupported;
     },
     
-   /* _getTouchEventMode : function(){
+    /* _getTouchEventMode : function(){
         if(this._isEventSupported('touchstart')){
             return 'iOS';
         }
@@ -316,13 +322,14 @@ var TOUCH =
         if(domElement === undefined){
             throw 'Element ' + element + ' not in DOM';
         }
-
-        elemHand = {
+        
+        elemHand = 
+        {
             domElement : domElement,
             handler : handler,
             equals : this._equals
         };
-
+        
         if(this._dom[type].indexOf(elemHand) === -1){
             this._dom[type].push(elemHand);
         }
@@ -365,4 +372,7 @@ var TOUCH =
             return false;
         }
     }*/
+    
+    
+    
 };
