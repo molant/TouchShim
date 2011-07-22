@@ -198,22 +198,37 @@ var TOUCH =
     },
     _onTouchMove : function(x, y, id){
         var i,
-        touchmove = TOUCH._dom.touchmove, currentTime = Date.now(), evt = 
+        j,
+        touchmove = TOUCH._dom.touchmove, 
+        touchenter,
+        touchleave,
+        currentTime = Date.now(), evt = 
         {
             clientX : x,
             clientY : y,
             identifier : id
         },
-        element = document.elementFromPoint(evt.clientX, evt.clientY), touch = TOUCH._createTouch(evt, 'touchmove', currentTime), touchEvent,
-        touches = [];
+        element = document.elementFromPoint(evt.clientX, evt.clientY), nextElement = element, 
+        touch = TOUCH._createTouch(evt, 'touchmove', currentTime), touchEvent,
+        touchEnter = TOUCH._createTouch(evt, 'touchenter', currentTime), touchEnterEvent,
+        touchLeave = TOUCH._createTouch(evt, 'touchleave', currentTime), touchLeaveEvent,
+        touches = [], 
+        touchesEnter = [],
+        touchesLeave = [],
+        previousTouch,
+        previousElement,
+        addedElements = [], removedElements = [], index;
         
         for(i = TOUCH._touches.length - 1; i >= 0; i -- ){
-            if(TOUCH._touches[i].identifier === touch.identifier && TOUCH._touches[i].clientX === touch.clientX && TOUCH._touches[i].clientY === touch.clientY){
-                //log('exit id:' + touch.identifier);
-                //we remove the previous event and add the new one with the updated timespan
-                TOUCH._touches.splice(i, 1);
-                TOUCH._touches.push(touch);
-                return;
+            if(TOUCH._touches[i].identifier === touch.identifier){
+                previousTouch = TOUCH._touches[i];
+                if(previousTouch.clientX === touch.clientX && previousTouch.clientY === touch.clientY){
+                    log('exit id:' + touch.identifier);
+                    //we remove the previous event and add the new one with the updated timespan
+                    TOUCH._touches.splice(i, 1);
+                    TOUCH._touches.push(touch);
+                    return;
+                }
             }
             if((currentTime - TOUCH._touches[i].timespan) <= TOUCH._threshold){
                 if(TOUCH._touches[i].type === 'touchend' || TOUCH._touches[i].type === 'cancel'){
@@ -221,6 +236,10 @@ var TOUCH =
                 }
                 else if(TOUCH._touches[i].type === 'touchmove'){
                     touches.push(TOUCH._touches[i]);
+                }else if(TOUCH._touches[i].type === 'touchenter'){
+                    touchesEnter.push(TOUCH._touches[i]);
+                }else if(TOUCH._touches[i].type === 'touchleave'){
+                    touchesLeave.push(TOUCH._touches[i]);
                 }
             }
             else{
@@ -233,14 +252,47 @@ var TOUCH =
         
         touchEvent = TOUCH._createTouchEvent(touches);
         
-        while(element){
+        while(nextElement){
+            addedElements.push(nextElement);
             for(i = 0; i < touchmove.length; i ++ ){
-                if(touchmove[i].domElement === element){
+                if(touchmove[i].domElement === nextElement){
                     touchmove[i].handler(touchEvent);
                     //do something about bubling here!    
                 }
             }
-            element = element.parentNode;
+            nextElement = nextElement.parentNode;
+        }
+        
+        previousElement = document.elementFromPoint(previousTouch.clientX, previousTouch.clientY);
+        if(previousElement !== element){
+            //we have entered a new element, touchenter and touchleave logic should be here!
+            while(previousElement){
+                index = addedElements.indexOf(previousElement);
+                if(index !== -1){
+                    addedElements.splice(index, 1);
+                }
+                else{
+                    removedElements.push(previousElement);
+                }
+                
+                previousElement = previousElement.parentNode;
+            }
+            if(addedElements.length > 0){
+                touchesEnter.push(touchEnter);
+                
+                for(i = 0; i < addedElements.length; i ++ ){
+                    for(j = 0; j < touchesEnter.length; j ++){
+                        if(addedElements[i] === touchesEnter[j].domElement){
+                            touchenter[j].handle(touchesEnter);                         
+                        }
+                    }
+                }
+                //fire enter
+            }
+            
+            if(removedElements.length > 0){
+                //fire leave
+            }
         }
     },
     
@@ -361,18 +413,4 @@ var TOUCH =
         
         throw 'Element ' + element + ' does not have the handler you have specified';
     }
-    
-    /*dispatchEvent : function(event){},
-    detect : function(){
-        try{
-            document.createEvent("MozTouchDown");
-            return true;
-        }
-        catch(e){
-            return false;
-        }
-    }*/
-    
-    
-    
 };
