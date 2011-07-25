@@ -1,4 +1,4 @@
-﻿var log = window.console.log;
+﻿var log = window.console !== undefined ? window.console.log : function(){};
 var TOUCH =
 {
     _subscribed: false,
@@ -148,8 +148,7 @@ var TOUCH =
         while (element) {
             for (i = 0; i < touchstart.length; i++) {
                 if (touchstart[i].domElement === element) {
-                    touchstart[i].handler(touchEvent);
-                    //do something about bubling here!    
+                    touchstart[i].handler(touchEvent);                      
                 }
             }
             element = element.parentNode;
@@ -189,8 +188,7 @@ var TOUCH =
         while (element) {
             for (i = 0; i < touchend.length; i++) {
                 if (touchend[i].domElement === element) {
-                    touchend[i].handler(touchEvent);
-                    //do something about bubling here!    
+                    touchend[i].handler(touchEvent);                    
                 }
             }
             element = element.parentNode;
@@ -215,6 +213,7 @@ var TOUCH =
         touches = [],
         touchesEnter = [],
         touchesLeave = [],
+        previousElement,
         previousTouch,
         addedElements = [], removedElements = [], index;
 
@@ -256,8 +255,7 @@ var TOUCH =
             addedElements.push(nextElement);
             for (i = 0; i < touchmove.length; i++) {
                 if (touchmove[i].domElement === nextElement) {
-                    touchmove[i].handler(touchEvent);
-                    //do something about bubling here!    
+                    touchmove[i].handler(touchEvent);                    
                 }
             }
             nextElement = nextElement.parentNode;
@@ -270,8 +268,7 @@ var TOUCH =
             previousElement = TOUCH._previousElement;
         }
 
-        if (previousElement !== element) {
-            //we have entered a new element, touchenter and touchleave logic should be here!
+        if (previousElement !== element) {            
             while (previousElement) {
                 index = addedElements.indexOf(previousElement);
                 if (index !== -1) {
@@ -299,7 +296,7 @@ var TOUCH =
                 touchesLeave.push(touchLeave);
                 touchLeaveEvent = TOUCH._createTouchEvent(touchLeave);
                 for (i = 0; i < removedElements.length; i++) {
-                    for (j = 0; j < removedElements.length; j++) {
+                    for (j = 0; j < touchesLeave.length; j++) {
                         if (removedElements[i] === touchleave[j].domElement) {
                             touchleave[j].handler(touchLeaveEvent);
                         }
@@ -312,6 +309,7 @@ var TOUCH =
     },
 
     _isEventSupported: function (eventName, element) {
+        //not in used at this moment...
         element = element || document.createElement("div");
         eventName = "on" + eventName;
         var isSupported = eventName in element;
@@ -327,37 +325,14 @@ var TOUCH =
         }
         element = null;
         return isSupported;
-    },
-
-    /* _getTouchEventMode : function(){
-    if(this._isEventSupported('touchstart')){
-    return 'iOS';
-    }
-    else if(this._isEventSupported('moztouchdown')){
-    return 'FF';
-    }
-    else{
-    return 'Other';
-    }
-    },*/
+    },   
 
     addEventListener: function (type, element, handler) {
         var domElement,
         elemHand,
         touch;
-        if (!this._subscribed) {
-            //            if (Modernizr.touch) {
-            //                //how do we detect the browser now?
-            //                document.addEventListener('MozTouchDown', this._onTouchStart, false);
-            //                document.addEventListener('MozTouchUp', this._onTouchEnd, false);
-            //                document.addEventListener('MozTouchMove', this._onTouchMove, false);
-
-            //                this._subscribed = true;
-            //            } else {
-            //                //nothing to do, addeventlistener throws no return values nor exceptions
-            //            }
-            // Think how to handle other browsers...
-
+        if (!this._subscribed) {          
+            // At this moment it supports only my activex touch control. We should add support for iOS (easy?) and Firefox (not too complicated?)
             try {
                 touch = new ActiveXObject("ActiveXTouch.IETouch");
 
@@ -367,8 +342,7 @@ var TOUCH =
                     touch.addEventListener('touchDown', TOUCH._onTouchStart);
                     touch.addEventListener('touchMove', TOUCH._onTouchMove);
                     touch.addEventListener('touchUp', TOUCH._onTouchEnd);
-                    this._subscribed = true;
-                    //TODO: update subscribed!
+                    this._subscribed = true;                    
                 }
                 else {
                     //No touch support. Add event doesn't return errors so just return
@@ -385,9 +359,10 @@ var TOUCH =
             throw 'Event ' + type + ' is not valid';
         }
 
-        domElement = document.getElementById(element);
-        if (domElement === undefined) {
-            throw 'Element ' + element + ' not in DOM';
+        domElement = (typeof element === "string") ? document.getElementById(element) : element;
+        
+        if (domElement.document === undefined) {
+            throw 'Element ' + element + ' not in DOM or not a DOM element';
         }
 
         elemHand =
