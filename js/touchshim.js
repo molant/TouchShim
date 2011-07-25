@@ -292,12 +292,19 @@ var TOUCH =
                             touchenter[j].handler(touchEnterEvent);
                         }
                     }
-                }
-                //fire enter
+                }                
             }
 
             if (removedElements.length > 0) {
-                //fire leave
+                touchesLeave.push(touchLeave);
+                touchLeaveEvent = TOUCH._createTouchEvent(touchLeave);
+                for (i = 0; i < removedElements.length; i++) {
+                    for (j = 0; j < removedElements.length; j++) {
+                        if (removedElements[i] === touchleave[j].domElement) {
+                            touchleave[j].handler(touchLeaveEvent);
+                        }
+                    }
+                }
             }
         }
 

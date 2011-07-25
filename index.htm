@@ -67,6 +67,11 @@
                     log('touchenter Green');
                 });
 
+                TOUCH.addEventListener('touchleave', 'touch2', function (evt) {
+                    var touchEvent = evt.touches[0];
+                    log('touchleave Green');
+                });
+
                 TOUCH.addEventListener('touchmove', 'touch', function (evt) {
                     var touchEvent = evt.touches[0];
                     log('touchmove Grey: ' + touchEvent.clientX + ' ' + touchEvent.clientY + ' ' + touchEvent.identifier + ' ' + touchEvent.timespan);                    
